@@ -179,6 +179,14 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
             </div>
 
             <CardContent className="p-8 flex flex-col items-center text-center relative z-10">
+              {/* Dynamic Background Glow */}
+              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[80px] transition-colors duration-1000 pointer-events-none opacity-20 ${
+                status === 'connected' ? 'bg-green-500' : 
+                status === 'connecting' ? 'bg-yellow-500' : 
+                status === 'disconnecting' ? 'bg-red-500' : 
+                'bg-blue-500'
+              }`} />
+
               <div className="mb-8 relative">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -192,39 +200,68 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                     {status === 'connected' && (
                       <>
                         <motion.div 
-                          animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                          animate={{ scale: [1, 1.6], opacity: [0.4, 0] }}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className="absolute inset-0 rounded-full bg-blue-500/20"
+                          className="absolute inset-0 rounded-full bg-green-500/20"
                         />
                         <motion.div 
-                          animate={{ scale: [1, 2], opacity: [0.3, 0] }}
+                          animate={{ scale: [1, 2.2], opacity: [0.2, 0] }}
                           transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                          className="absolute inset-0 rounded-full bg-blue-500/10"
+                          className="absolute inset-0 rounded-full bg-green-500/10"
                         />
                       </>
+                    )}
+
+                    {/* Spinning ring when connecting */}
+                    {(status === 'connecting' || status === 'disconnecting') && (
+                      <motion.div 
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className={`absolute -inset-4 rounded-full border-2 border-t-transparent border-l-transparent ${
+                          status === 'connecting' ? 'border-yellow-500' : 'border-red-500'
+                        }`}
+                      />
                     )}
                     
                     <button
                       onClick={toggleConnection}
                       disabled={status === 'connecting' || status === 'disconnecting'}
-                      className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl ${
+                      className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl relative z-10 ${
                         status === 'connected' 
-                          ? 'bg-blue-600 shadow-blue-600/40' 
-                          : status === 'connecting' || status === 'disconnecting'
-                          ? 'bg-zinc-800 cursor-wait'
+                          ? 'bg-green-600 shadow-green-600/40' 
+                          : status === 'connecting'
+                          ? 'bg-yellow-600/20 border border-yellow-500/50 cursor-wait'
+                          : status === 'disconnecting'
+                          ? 'bg-red-600/20 border border-red-500/50 cursor-wait'
                           : 'bg-zinc-800 hover:bg-zinc-700 shadow-black'
                       }`}
                     >
-                      <Power className={`w-12 h-12 ${status === 'connected' ? 'text-white' : 'text-zinc-400'}`} />
+                      {status === 'connected' ? (
+                        <Shield className="w-12 h-12 text-white animate-pulse" />
+                      ) : status === 'connecting' ? (
+                        <RefreshCw className="w-12 h-12 text-yellow-500 animate-spin" />
+                      ) : status === 'disconnecting' ? (
+                        <RefreshCw className="w-12 h-12 text-red-500 animate-spin" />
+                      ) : (
+                        <Power className="w-12 h-12 text-zinc-400" />
+                      )}
                     </button>
                   </motion.div>
                 </AnimatePresence>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-10">
                 <div className="flex items-center justify-center gap-2">
-                  <h2 className="text-2xl font-bold">
-                    {status === 'connected' ? 'Protected' : status === 'connecting' ? 'Securing Connection...' : 'Not Protected'}
+                  <h2 className={`text-2xl font-bold transition-colors duration-500 ${
+                    status === 'connected' ? 'text-green-500' : 
+                    status === 'connecting' ? 'text-yellow-500' : 
+                    status === 'disconnecting' ? 'text-red-500' : 
+                    'text-white'
+                  }`}>
+                    {status === 'connected' ? 'Protected' : 
+                     status === 'connecting' ? 'Securing Connection...' : 
+                     status === 'disconnecting' ? 'Disconnecting...' : 
+                     'Not Protected'}
                   </h2>
                   {status === 'connected' && settings.turboMode && (
                     <Badge className="bg-blue-600 animate-pulse">TURBO</Badge>
@@ -233,6 +270,8 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                 <p className="text-zinc-500 text-sm max-w-xs mx-auto">
                   {status === 'connected' 
                     ? `Encrypted connection via ${selectedServer.name}` 
+                    : status === 'connecting'
+                    ? 'Establishing secure tunnel...'
                     : 'Your internet traffic is currently exposed. Connect to secure your data.'}
                 </p>
               </div>

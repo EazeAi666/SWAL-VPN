@@ -1,0 +1,21 @@
+{
+  "name": "SWAL VPN",
+  "short_name": "SWAL VPN",
+  "description": "Free, high-speed, ad-supported VPN service.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/vpn/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/vpn/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -63,6 +63,29 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     setLogs(prev => [{ time: new Date().toLocaleTimeString(), message, type }, ...prev].slice(0, 50));
   };
 
+  const handleSettingsUpdate = (newSettings: SecuritySettings) => {
+    // Log protocol changes
+    if (newSettings.protocol !== settings.protocol) {
+      addLog(`Protocol changed to ${newSettings.protocol}`, 'info');
+    }
+    
+    // Log security feature toggles
+    if (newSettings.killSwitch !== settings.killSwitch) {
+      addLog(`SECURITY ALERT: Kill Switch ${newSettings.killSwitch ? 'enabled' : 'disabled'}`, newSettings.killSwitch ? 'success' : 'warning');
+    }
+    if (newSettings.adBlocker !== settings.adBlocker) {
+      addLog(`Security Update: Ad & Malware blocker ${newSettings.adBlocker ? 'active' : 'inactive'}`, 'info');
+    }
+    if (newSettings.dnsLeakProtection !== settings.dnsLeakProtection) {
+      addLog(`DNS Leak Protection ${newSettings.dnsLeakProtection ? 'enabled' : 'disabled'}`, 'success');
+    }
+    if (newSettings.turboMode !== settings.turboMode) {
+      addLog(`Turbo Mode ${newSettings.turboMode ? 'activated' : 'deactivated'}`, newSettings.turboMode ? 'success' : 'info');
+    }
+
+    setSettings(newSettings);
+  };
+
   const toggleConnection = () => {
     if (status === 'disconnected') {
       setStatus('connecting');
@@ -425,7 +448,7 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                   <CardContent className="p-6">
                     <SecurityPanel 
                       settings={settings} 
-                      onUpdate={setSettings} 
+                      onUpdate={handleSettingsUpdate} 
                     />
                   </CardContent>
                 </Card>
@@ -434,14 +457,44 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
               <TabsContent value="logs" className="m-0">
                 <Card className="bg-zinc-900/40 border-zinc-800">
                   <CardContent className="p-6">
-                    <ScrollArea className="h-[400px] pr-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold">Connection Logs</h3>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-[10px] text-zinc-500 hover:text-blue-400"
+                          onClick={() => {
+                            const logText = logs.map(l => `[${l.time}] ${l.message}`).join('\n');
+                            navigator.clipboard.writeText(logText);
+                            addLog('Logs copied to clipboard', 'success');
+                          }}
+                        >
+                          Copy
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-[10px] text-zinc-500 hover:text-red-400"
+                          onClick={() => setLogs([])}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                    <ScrollArea className="h-[360px] pr-4">
                       <div className="space-y-3">
                         {logs.map((log, i) => (
-                          <div key={i} className="flex gap-3 text-[11px] font-mono leading-relaxed">
+                          <div key={i} className="flex gap-3 text-[11px] font-mono leading-relaxed items-start">
                             <span className="text-zinc-600 shrink-0">[{log.time}]</span>
+                            <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                              log.type === 'success' ? 'bg-green-500' :
+                              log.type === 'warning' ? 'bg-yellow-500' :
+                              'bg-blue-500'
+                            }`} />
                             <span className={
-                              log.type === 'success' ? 'text-green-500' :
-                              log.type === 'warning' ? 'text-yellow-500' :
+                              log.type === 'success' ? 'text-green-500/90' :
+                              log.type === 'warning' ? 'text-yellow-500/90' :
                               'text-zinc-400'
                             }>
                               {log.message}

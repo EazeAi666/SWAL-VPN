@@ -48,7 +48,8 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     dnsLeakProtection: true,
     adBlocker: true,
     protocol: 'WireGuard',
-    turboMode: userProfile.tier === 'premium'
+    turboMode: userProfile.tier === 'premium',
+    proxy: false
   });
   const [speedHistory, setSpeedHistory] = useState<{ time: string; download: number; upload: number }[]>([]);
   
@@ -81,6 +82,9 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     }
     if (newSettings.turboMode !== settings.turboMode) {
       addLog(`Turbo Mode ${newSettings.turboMode ? 'activated' : 'deactivated'}`, newSettings.turboMode ? 'success' : 'info');
+    }
+    if (newSettings.proxy !== settings.proxy) {
+      addLog(`HTTP Proxy ${newSettings.proxy ? 'enabled' : 'disabled'}`, 'info');
     }
 
     setSettings(newSettings);
@@ -159,6 +163,19 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
             <span className="font-bold text-xl tracking-tight">SWAL <span className="text-blue-500">VPN</span></span>
           </div>
           <div className="flex items-center gap-4">
+            <AnimatePresence>
+              {status === 'connected' && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20"
+                >
+                  <Lock className="w-3 h-3 text-green-500" />
+                  <span className="text-[10px] text-green-500 font-bold uppercase tracking-wider">Secure</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <Badge variant="outline" className={`${status === 'connected' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'} px-3 py-1`}>
               <div className={`w-1.5 h-1.5 rounded-full mr-2 ${status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-zinc-500'}`} />
               {status.charAt(0).toUpperCase() + status.slice(1)}

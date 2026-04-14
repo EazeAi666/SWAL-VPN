@@ -27,6 +27,7 @@ export interface SecuritySettings {
   adBlocker: boolean;
   protocol: 'OpenVPN' | 'WireGuard' | 'IKEv2';
   turboMode: boolean;
+  proxy: boolean;
 }
 
 export interface UserProfile {

@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Zap, Globe, Lock } from 'lucide-react';
+import { Shield, Zap, Globe, Lock, Server } from 'lucide-react';
 import { SecuritySettings } from '../types';
 
 interface SecurityPanelProps {
@@ -20,6 +20,20 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({ settings, onUpdate
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+        <div className="flex items-center gap-3">
+          <Server className="w-5 h-5 text-orange-500" />
+          <div className="space-y-0.5">
+            <Label className="text-sm font-medium">HTTP Proxy</Label>
+            <p className="text-xs text-zinc-500">Route traffic through proxy</p>
+          </div>
+        </div>
+        <Switch 
+          checked={settings.proxy} 
+          onCheckedChange={(val) => handleChange('proxy', val)} 
+        />
+      </div>
+
       <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
         <div className="flex items-center gap-3">
           <Shield className="w-5 h-5 text-blue-500" />

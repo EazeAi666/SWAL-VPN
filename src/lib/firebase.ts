@@ -9,7 +9,21 @@ import {
   User 
 } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, Timestamp } from 'firebase/firestore';
-import firebaseConfigJson from '../../firebase-applet-config.json';
+
+// Default config if the JSON file is missing or empty
+const defaultConfig = {
+  apiKey: '',
+  authDomain: '',
+  projectId: '',
+  storageBucket: '',
+  messagingSenderId: '',
+  appId: '',
+  firestoreDatabaseId: ''
+};
+
+// @ts-ignore - Handle missing file on GitHub
+import firebaseConfigJsonImport from '../../firebase-applet-config.json';
+const firebaseConfigJson = firebaseConfigJsonImport || defaultConfig;
 
 // Helper to check if a value is a placeholder or invalid
 const isPlaceholder = (val: string | undefined) => {

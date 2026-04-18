@@ -213,8 +213,13 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
       <header className="border-b border-zinc-800/50 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 flex items-center justify-center">
+              <img 
+                src="logo.png" 
+                alt="Logo" 
+                className="w-full h-full object-contain"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <span className="font-bold text-xl tracking-tight">SWAL <span className="text-blue-500">VPN</span></span>
           </div>

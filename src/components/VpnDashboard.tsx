@@ -21,7 +21,10 @@ import {
   LayoutDashboard,
   Server as ServerIcon,
   ShieldCheck,
-  FileText
+  FileText,
+  Copy,
+  User,
+  Check
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -60,7 +63,9 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
   const [speedHistory, setSpeedHistory] = useState<{ time: string; download: number; upload: number }[]>([]);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
-  const [activeMobileTab, setActiveMobileTab] = useState<'home' | 'servers' | 'security' | 'logs'>('home');
+  const [activeMobileTab, setActiveMobileTab] = useState<'home' | 'servers' | 'security' | 'logs' | 'account'>('home');
+  const [vpnKey, setVpnKey] = useState<string>('');
+  const [copied, setCopied] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -178,6 +183,23 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     addLog(`Kill Switch ${settings.killSwitch ? 'enabled' : 'disabled'}`, settings.killSwitch ? 'success' : 'warning');
   }, [settings.killSwitch]);
 
+  useEffect(() => {
+    if (status === 'connected' && !vpnKey) {
+      const mockKey = `SWAL-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+      setVpnKey(mockKey);
+      addLog('Connection key generated', 'success');
+    } else if (status === 'disconnected') {
+      setVpnKey('');
+    }
+  }, [status, vpnKey]);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    addLog('Key copied to clipboard', 'success');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const formatDuration = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -216,6 +238,12 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
               className={`text-sm font-medium transition-colors ${activeMobileTab === 'security' ? 'text-blue-500' : 'text-zinc-400 hover:text-white'}`}
             >
               Security
+            </button>
+            <button 
+              onClick={() => setActiveMobileTab('account')}
+              className={`text-sm font-medium transition-colors ${activeMobileTab === 'account' ? 'text-blue-500' : 'text-zinc-400 hover:text-white'}`}
+            >
+              Account
             </button>
           </nav>
 
@@ -509,6 +537,10 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                 <Activity className="w-4 h-4 mr-2" />
                 Logs
               </TabsTrigger>
+              <TabsTrigger value="account" className="flex-1 rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                <User className="w-4 h-4 mr-2" />
+                Account
+              </TabsTrigger>
             </TabsList>
             
             <div className="mt-6">
@@ -608,6 +640,66 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              <TabsContent value="account" className="m-0">
+                <Card className="bg-zinc-900/40 border-zinc-800">
+                  <CardContent className="p-6 space-y-6">
+                    <div className="flex items-center gap-4 border-b border-zinc-800 pb-6">
+                      <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center border border-blue-500/30">
+                        <User className="w-8 h-8 text-blue-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold">{userProfile.email.split('@')[0]}</h3>
+                        <p className="text-sm text-zinc-500">{userProfile.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-zinc-500">Subscription Tier</span>
+                        <Badge className="bg-blue-600/20 text-blue-400 border border-blue-500/30">
+                          {userProfile.tier.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-zinc-500">Plan Expiry</span>
+                        <span className="text-sm font-medium">{new Date(userProfile.expiryDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-zinc-950/50 rounded-xl border border-zinc-800 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Current VPN Session Key</h4>
+                      {status === 'connected' ? (
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 bg-zinc-900 p-2 rounded text-sm font-mono text-blue-400 border border-zinc-800">
+                            {vpnKey}
+                          </code>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => copyToClipboard(vpnKey)}
+                            className="text-zinc-400 hover:text-white"
+                          >
+                            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="py-2 text-center">
+                          <p className="text-sm text-zinc-500 italic">Please connect to a server to generate your connection key.</p>
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            onClick={() => setActiveMobileTab('home')}
+                            className="text-blue-500 p-0 h-auto mt-2"
+                          >
+                            Go to Dashboard
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </div>
           </Tabs>
 
@@ -697,6 +789,74 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
               </Card>
             </motion.div>
           )}
+
+          {activeMobileTab === 'account' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="bg-zinc-900/40 border-zinc-800 border-none sm:border-solid">
+                <CardContent className="p-6 space-y-6">
+                  <div className="flex items-center gap-4 border-b border-zinc-800 pb-6">
+                    <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center border border-blue-500/30">
+                      <User className="w-8 h-8 text-blue-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">{userProfile.email.split('@')[0]}</h3>
+                      <p className="text-sm text-zinc-500">{userProfile.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-500">Subscription Tier</span>
+                      <Badge className="bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1">
+                        {userProfile.tier.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-500">Plan Expiry</span>
+                      <span className="text-sm font-bold text-zinc-200">{new Date(userProfile.expiryDate).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-zinc-950/50 rounded-2xl border border-zinc-800 space-y-4">
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Connection Key</h4>
+                    {status === 'connected' ? (
+                      <div className="flex items-center gap-3">
+                        <code className="flex-1 bg-zinc-900 p-3 rounded-xl text-xs font-mono text-blue-400 border border-zinc-800 break-all">
+                          {vpnKey}
+                        </code>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => copyToClipboard(vpnKey)}
+                          className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white shrink-0"
+                        >
+                          {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="py-4 text-center space-y-3">
+                        <p className="text-sm text-zinc-500">Please connect to a server to generate your connection key.</p>
+                        <Button 
+                          onClick={() => setActiveMobileTab('home')}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12 font-bold"
+                        >
+                          Connect Now
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-red-500/50 text-red-500 hover:bg-red-500/10 rounded-xl h-12 font-bold mt-4"
+                    onClick={onSignOut}
+                  >
+                    Sign Out
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </div>
       </main>
 
@@ -730,6 +890,13 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
           >
             <FileText className="w-5 h-5" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Logs</span>
+          </button>
+          <button 
+            onClick={() => setActiveMobileTab('account')}
+            className={`flex flex-col items-center gap-1 transition-colors ${activeMobileTab === 'account' ? 'text-blue-500' : 'text-zinc-500'}`}
+          >
+            <User className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Account</span>
           </button>
         </div>
       </nav>

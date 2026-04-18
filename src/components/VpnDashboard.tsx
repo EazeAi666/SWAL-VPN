@@ -17,7 +17,11 @@ import {
   LogIn,
   Calendar,
   Key,
-  Smartphone
+  Smartphone,
+  LayoutDashboard,
+  Server as ServerIcon,
+  ShieldCheck,
+  FileText
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -56,6 +60,7 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
   const [speedHistory, setSpeedHistory] = useState<{ time: string; download: number; upload: number }[]>([]);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState<'home' | 'servers' | 'security' | 'logs'>('home');
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -184,14 +189,37 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans selection:bg-blue-500/30">
       {/* Header */}
       <header className="border-b border-zinc-800/50 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Shield className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl tracking-tight">SWAL <span className="text-blue-500">VPN</span></span>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Desktop Nav Items */}
+          <nav className="hidden lg:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+            <button 
+              onClick={() => setActiveMobileTab('home')}
+              className={`text-sm font-medium transition-colors ${activeMobileTab === 'home' ? 'text-blue-500' : 'text-zinc-400 hover:text-white'}`}
+            >
+              Dashboard
+            </button>
+            <button 
+              onClick={() => setActiveMobileTab('servers')}
+              className={`text-sm font-medium transition-colors ${activeMobileTab === 'servers' ? 'text-blue-500' : 'text-zinc-400 hover:text-white'}`}
+            >
+              Servers
+            </button>
+            <button 
+              onClick={() => setActiveMobileTab('security')}
+              className={`text-sm font-medium transition-colors ${activeMobileTab === 'security' ? 'text-blue-500' : 'text-zinc-400 hover:text-white'}`}
+            >
+              Security
+            </button>
+          </nav>
+
+          <div className="flex items-center gap-2 sm:gap-4">
             <AnimatePresence>
               {status === 'connected' && (
                 <motion.div
@@ -255,10 +283,12 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Connection Status & Stats */}
-        <div className="lg:col-span-7 space-y-6">
-          <Card className="bg-zinc-900/40 border-zinc-800 overflow-hidden relative">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:mb-0 mb-20">
+        {/* Connection View - Always visible on desktop side-by-side, toggle on mobile */}
+        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 ${activeMobileTab !== 'home' ? 'hidden lg:grid' : 'grid'}`}>
+          {/* Left Column: Connection Status & Stats */}
+          <div className="lg:col-span-7 space-y-6">
+            <Card className="bg-zinc-900/40 border-zinc-800 overflow-hidden relative border-none sm:border-solid">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-transparent pointer-events-none" />
             
             {/* World Map Background */}
@@ -463,8 +493,8 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
           </div>
         </div>
 
-        {/* Right Column: Servers & Settings */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Right Column: Servers & Settings (On desktop, these are tabs) */}
+        <div className="lg:col-span-5 hidden lg:block space-y-6">
           <Tabs defaultValue="servers" className="w-full">
             <TabsList className="w-full bg-zinc-900/50 border border-zinc-800 p-1 rounded-xl h-12">
               <TabsTrigger value="servers" className="flex-1 rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
@@ -595,11 +625,118 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
             </CardContent>
           </Card>
         </div>
+      </div>
+      {/* Mobile Specific Views */}
+      <div className="lg:hidden space-y-6">
+          {activeMobileTab === 'servers' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="bg-zinc-900/40 border-zinc-800 border-none sm:border-solid">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold">Servers</h3>
+                    <Button variant="ghost" size="sm" className="h-8 text-xs text-zinc-500 hover:text-white">
+                      <RefreshCw className="w-3 h-3 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
+                  <ServerList 
+                    selectedServer={selectedServer} 
+                    onSelect={(s) => {
+                      setSelectedServer(s);
+                      setActiveMobileTab('home');
+                      if (status === 'connected') {
+                        toggleConnection(); // Quick reconnect logic
+                        setTimeout(toggleConnection, 1000);
+                      }
+                    }} 
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {activeMobileTab === 'security' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="bg-zinc-900/40 border-zinc-800 border-none sm:border-solid">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-bold mb-6">Security Settings</h3>
+                  <SecurityPanel 
+                    settings={settings} 
+                    onUpdate={handleSettingsUpdate} 
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {activeMobileTab === 'logs' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="bg-zinc-900/40 border-zinc-800 border-none sm:border-solid">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Activity Logs</h3>
+                    <Button variant="ghost" size="sm" onClick={() => setLogs([])} className="text-red-400">Clear</Button>
+                  </div>
+                  <ScrollArea className="h-[calc(100vh-250px)] pr-4">
+                    <div className="space-y-4">
+                      {logs.map((log, i) => (
+                        <div key={i} className="flex gap-3 text-xs font-mono leading-relaxed items-start border-b border-zinc-800/50 pb-3">
+                          <span className="text-zinc-600 shrink-0">[{log.time}]</span>
+                          <span className={
+                            log.type === 'success' ? 'text-green-500' :
+                            log.type === 'warning' ? 'text-yellow-500' :
+                            'text-zinc-400'
+                          }>
+                            {log.message}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </div>
       </main>
 
-      {/* Footer / Status Bar */}
-      <footer className="border-t border-zinc-800/50 bg-black/50 backdrop-blur-xl py-4 mt-auto">
-        <div className="max-w-5xl mx-auto px-6 flex items-center justify-between text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-t border-zinc-800 px-6 py-3">
+        <div className="flex items-center justify-between max-w-lg mx-auto">
+          <button 
+            onClick={() => setActiveMobileTab('home')}
+            className={`flex flex-col items-center gap-1 transition-colors ${activeMobileTab === 'home' ? 'text-blue-500' : 'text-zinc-500'}`}
+          >
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Home</span>
+          </button>
+          <button 
+            onClick={() => setActiveMobileTab('servers')}
+            className={`flex flex-col items-center gap-1 transition-colors ${activeMobileTab === 'servers' ? 'text-blue-500' : 'text-zinc-500'}`}
+          >
+            <ServerIcon className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Servers</span>
+          </button>
+          <button 
+            onClick={() => setActiveMobileTab('security')}
+            className={`flex flex-col items-center gap-1 transition-colors ${activeMobileTab === 'security' ? 'text-blue-500' : 'text-zinc-500'}`}
+          >
+            <ShieldCheck className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Security</span>
+          </button>
+          <button 
+            onClick={() => setActiveMobileTab('logs')}
+            className={`flex flex-col items-center gap-1 transition-colors ${activeMobileTab === 'logs' ? 'text-blue-500' : 'text-zinc-500'}`}
+          >
+            <FileText className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Logs</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Footer / Status Bar - Hidden on mobile, shown on desktop */}
+      <footer className="hidden lg:block border-t border-zinc-800/50 bg-black/50 backdrop-blur-xl py-4 mt-auto">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <MapPin className="w-3 h-3" />

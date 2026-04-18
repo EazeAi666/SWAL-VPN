@@ -10,21 +10,6 @@ import {
 } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, Timestamp } from 'firebase/firestore';
 
-// Default config if the JSON file is missing or empty
-const defaultConfig = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
-  firestoreDatabaseId: ''
-};
-
-// @ts-ignore - Handle missing file on GitHub
-import firebaseConfigJsonImport from '../../firebase-applet-config.json';
-const firebaseConfigJson = firebaseConfigJsonImport || defaultConfig;
-
 // Helper to check if a value is a placeholder or invalid
 const isPlaceholder = (val: string | undefined) => {
   if (!val) return true;
@@ -32,24 +17,49 @@ const isPlaceholder = (val: string | undefined) => {
   return placeholders.includes(val) || val.includes('INSERT_');
 };
 
-// Firebase configuration using Environment Variables (Vercel) with JSON fallback (AI Studio)
-const firebaseConfig = {
-  apiKey: !isPlaceholder(import.meta.env.VITE_FIREBASE_API_KEY) ? import.meta.env.VITE_FIREBASE_API_KEY : firebaseConfigJson.apiKey,
-  authDomain: !isPlaceholder(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN) ? import.meta.env.VITE_FIREBASE_AUTH_DOMAIN : firebaseConfigJson.authDomain,
-  projectId: !isPlaceholder(import.meta.env.VITE_FIREBASE_PROJECT_ID) ? import.meta.env.VITE_FIREBASE_PROJECT_ID : firebaseConfigJson.projectId,
-  storageBucket: !isPlaceholder(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET) ? import.meta.env.VITE_FIREBASE_STORAGE_BUCKET : firebaseConfigJson.storageBucket,
-  messagingSenderId: !isPlaceholder(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID) ? import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID : firebaseConfigJson.messagingSenderId,
-  appId: !isPlaceholder(import.meta.env.VITE_FIREBASE_APP_ID) ? import.meta.env.VITE_FIREBASE_APP_ID : firebaseConfigJson.appId,
-  firestoreDatabaseId: !isPlaceholder(import.meta.env.VITE_FIREBASE_DATABASE_ID) ? import.meta.env.VITE_FIREBASE_DATABASE_ID : firebaseConfigJson.firestoreDatabaseId
+// Start with environment variables - defaulting to null for invalid check
+const envConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID
 };
 
-// Validate that we have the required config
-if (!firebaseConfig.apiKey) {
-  console.warn("Firebase API Key is missing. If you are in production, set VITE_FIREBASE_API_KEY in your environment variables.");
+const firebaseConfig: any = { ...envConfig };
+
+// Attempt to load from JSON
+try {
+  // @ts-ignore
+  const globConfig = import.meta.glob('../../firebase-applet-config.json', { eager: true, import: 'default' });
+  const jsonConfig: any = Object.values(globConfig)[0];
+  
+  if (jsonConfig) {
+    Object.keys(jsonConfig).forEach(key => {
+      if (isPlaceholder(firebaseConfig[key])) {
+        firebaseConfig[key] = jsonConfig[key];
+      }
+    });
+  }
+} catch (e) {
+  // Config file might be missing
+}
+
+// Final fallback to empty strings for initialization
+['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId', 'firestoreDatabaseId'].forEach(key => {
+  if (!firebaseConfig[key]) firebaseConfig[key] = '';
+});
+
+// Validate that we have the required keys
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey === '') {
+  console.warn("Firebase API Key is missing. Login will not work.");
 }
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+// CRITICAL: Ensure database ID is correctly passed if it exists
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || undefined);
 export const googleProvider = new GoogleAuthProvider();
 

@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import VpnDashboard from './components/VpnDashboard';
 import { AuthScreen } from './components/AuthScreen';
-import { auth, db } from './lib/firebase';
+import { auth, db, handleFirestoreError, OperationType } from './lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { UserProfile } from './types';
@@ -33,6 +33,7 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
 
+    const path = `users/${user.uid}`;
     const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), (doc) => {
       if (doc.exists()) {
         const data = doc.data();
@@ -58,6 +59,8 @@ export default function App() {
         setView('auth');
       }
       setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, path);
     });
 
     return () => unsubscribeProfile();

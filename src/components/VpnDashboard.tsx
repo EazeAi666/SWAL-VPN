@@ -15,7 +15,9 @@ import {
   RefreshCw,
   Info,
   LogIn,
-  Calendar
+  Calendar,
+  Key,
+  Smartphone
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -52,8 +54,35 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     proxy: false
   });
   const [speedHistory, setSpeedHistory] = useState<{ time: string; download: number; upload: number }[]>([]);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsAppInstalled(true);
+    }
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setIsAppInstalled(true);
+    }
+  };
 
   const [logs, setLogs] = useState<{ time: string; message: string; type: 'info' | 'success' | 'warning' }[]>([
     { time: new Date().toLocaleTimeString(), message: 'System initialized', type: 'info' },
@@ -163,6 +192,32 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
             <span className="font-bold text-xl tracking-tight">SWAL <span className="text-blue-500">VPN</span></span>
           </div>
           <div className="flex items-center gap-4">
+            <AnimatePresence>
+              {status === 'connected' && (
+                <motion.div
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -20, opacity: 0 }}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20"
+                >
+                  <Key className="w-3 h-3 text-blue-500" />
+                  <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none">VPN Active</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {!isAppInstalled && deferredPrompt && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleInstallClick}
+                className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white border-none h-8 px-3 text-xs"
+              >
+                <Smartphone className="w-3.5 h-3.5 mr-1.5" />
+                Download App
+              </Button>
+            )}
+            
             <AnimatePresence>
               {status === 'connected' && (
                 <motion.div

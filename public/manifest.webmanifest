@@ -2,7 +2,7 @@
   "name": "SWAL VPN - Secure Fast Proxy",
   "short_name": "SWAL VPN",
   "description": "High-performance VPN with global servers, ad-blocking, and military-grade encryption.",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#2563eb",
@@ -10,10 +10,16 @@
   "categories": ["utilities", "productivity"],
   "icons": [
     {
-      "src": "logo.png",
+      "src": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/shield.svg",
       "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "https://picsum.photos/seed/swalvpn/512/512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
   "screenshots": [

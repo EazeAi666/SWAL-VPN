@@ -10,9 +10,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pages: write
-      id-token: write
+      contents: write # Required for the deploy action
     steps:
       - name: Checkout
         uses: actions/checkout@v4

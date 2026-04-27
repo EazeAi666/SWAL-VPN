@@ -1,11 +1,16 @@
 import { Server } from './types';
 
 export const SERVERS: Server[] = [
+  { id: 'us-ny', name: 'USA New York', country: 'USA', city: 'New York', latency: 32, load: 45, flag: '🇺🇸', ip: '104.21.45.10', tier: 'standard' },
   { id: 'us-la', name: 'USA Los Angeles', country: 'USA', city: 'Los Angeles', latency: 42, load: 35, flag: '🇺🇸', ip: '104.21.45.12', tier: 'standard' },
   { id: 'us-miami', name: 'USA Miami', country: 'USA', city: 'Miami', latency: 38, load: 42, flag: '🇺🇸', ip: '104.21.45.15', tier: 'standard' },
+  { id: 'us-chi', name: 'USA Chicago', country: 'USA', city: 'Chicago', latency: 40, load: 31, flag: '🇺🇸', ip: '104.21.45.20', tier: 'standard' },
+  { id: 'us-dal', name: 'USA Dallas', country: 'USA', city: 'Dallas', latency: 36, load: 28, flag: '🇺🇸', ip: '104.21.45.25', tier: 'standard' },
   { id: 'ca-tor', name: 'Canada Toronto', country: 'Canada', city: 'Toronto', latency: 35, load: 40, flag: '🇨🇦', ip: '192.168.1.1', tier: 'standard' },
   { id: 'ca-van', name: 'Canada Vancouver', country: 'Canada', city: 'Vancouver', latency: 48, load: 25, flag: '🇨🇦', ip: '192.168.1.5', tier: 'standard' },
-  { id: 'uk-lon', name: 'UK London', country: 'UK', city: 'London', latency: 12, load: 30, flag: '🇬🇧', ip: '45.12.89.4', tier: 'standard' },
+  { id: 'uk-lon-1', name: 'UK London #1', country: 'UK', city: 'London', latency: 12, load: 30, flag: '🇬🇧', ip: '45.12.89.4', tier: 'standard' },
+  { id: 'uk-lon-2', name: 'UK London #2', country: 'UK', city: 'London', latency: 14, load: 22, flag: '🇬🇧', ip: '45.12.89.5', tier: 'standard' },
+  { id: 'uk-man', name: 'UK Manchester', country: 'UK', city: 'Manchester', latency: 16, load: 18, flag: '🇬🇧', ip: '45.12.89.10', tier: 'standard' },
   { id: 'de-fra', name: 'Germany Frankfurt', country: 'Germany', city: 'Frankfurt', latency: 18, load: 65, flag: '🇩🇪', ip: '80.123.45.67', tier: 'standard' },
   { id: 'jp-tok', name: 'Japan Tokyo (Turbo)', country: 'Japan', city: 'Tokyo', latency: 145, load: 20, flag: '🇯🇵', ip: '122.45.67.89', tier: 'standard', optimizedFor: 'streaming' },
   { id: 'fr-par', name: 'France Paris (Turbo)', country: 'France', city: 'Paris', latency: 22, load: 50, flag: '🇫🇷', ip: '5.6.7.8', tier: 'standard', optimizedFor: 'streaming' },

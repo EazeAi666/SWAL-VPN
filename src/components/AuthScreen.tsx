@@ -62,13 +62,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
         className="w-full max-w-md"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-24 h-24 mb-4 drop-shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-            <img 
-              src="logo.png" 
-              alt="SWAL VPN Logo" 
-              className="w-full h-full object-contain"
-              referrerPolicy="no-referrer"
-            />
+          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-2xl shadow-blue-600/20">
+            <Shield className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">SWAL <span className="text-blue-500">VPN</span></h1>
           <p className="text-zinc-500 mt-2">Secure. Fast. Private.</p>

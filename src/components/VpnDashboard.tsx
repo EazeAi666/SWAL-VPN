@@ -150,6 +150,21 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     }
   };
 
+  const quickConnect = () => {
+    if (status === 'disconnected') {
+      const randomServer = SERVERS[Math.floor(Math.random() * SERVERS.length)];
+      setSelectedServer(randomServer);
+      setStatus('connecting');
+      addLog(`Quick Connect: Selecting random server...`, 'info');
+      addLog(`Initiating connection to ${randomServer.name}...`, 'info');
+      setTimeout(() => {
+        setStatus('connected');
+        addLog(`Connected to ${randomServer.name} (${randomServer.ip})`, 'success');
+        addLog(`Tunnel established using ${settings.protocol}`, 'success');
+      }, 2000);
+    }
+  };
+
   useEffect(() => {
     if (status === 'connected') {
       const interval = setInterval(() => {
@@ -213,13 +228,8 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
       <header className="border-b border-zinc-800/50 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 flex items-center justify-center">
-              <img 
-                src="logo.png" 
-                alt="Logo" 
-                className="w-full h-full object-contain"
-                referrerPolicy="no-referrer"
-              />
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl tracking-tight">SWAL <span className="text-blue-500">VPN</span></span>
           </div>
@@ -409,12 +419,15 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
               </div>
 
               <div className="space-y-2 relative z-10">
-                <div className="flex items-center justify-center gap-2">
+                <div 
+                  className={`flex items-center justify-center gap-2 ${status === 'disconnected' ? 'cursor-pointer group' : ''}`}
+                  onClick={status === 'disconnected' ? quickConnect : undefined}
+                >
                   <h2 className={`text-2xl font-bold transition-colors duration-500 ${
                     status === 'connected' ? 'text-green-500' : 
                     status === 'connecting' ? 'text-yellow-500' : 
                     status === 'disconnecting' ? 'text-red-500' : 
-                    'text-white'
+                    'text-white group-hover:text-blue-500'
                   }`}>
                     {status === 'connected' ? 'Protected' : 
                      status === 'connecting' ? 'Securing Connection...' : 

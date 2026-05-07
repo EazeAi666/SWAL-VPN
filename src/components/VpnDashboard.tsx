@@ -201,9 +201,15 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
 
   useEffect(() => {
     if (status === 'connected' && !vpnKey) {
-      const mockKey = `SWAL-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+      // Use crypto for a more secure-looking random key
+      const array = new Uint32Array(2);
+      window.crypto.getRandomValues(array);
+      const part1 = array[0].toString(36).substring(0, 4).toUpperCase();
+      const part2 = array[1].toString(36).toUpperCase();
+      const mockKey = `SWAL-${part1}-${part2}`;
+      
       setVpnKey(mockKey);
-      addLog('Connection key generated', 'success');
+      addLog('Secure connection key generated', 'success');
     } else if (status === 'disconnected') {
       setVpnKey('');
     }
@@ -225,7 +231,6 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans selection:bg-blue-500/30">
-      {/* Header */}
       <header className="border-b border-zinc-800/50 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -318,14 +323,6 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
           </div>
         </div>
       </header>
-
-      {/* Ad Placeholder */}
-      <div className="max-w-5xl mx-auto px-6 mt-4">
-        <div className="w-full h-20 bg-zinc-900/40 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-600 text-xs font-mono uppercase tracking-widest overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-          Advertisement Placeholder
-        </div>
-      </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:mb-0 mb-20">
         {/* Connection View - Always visible on desktop side-by-side, toggle on mobile */}

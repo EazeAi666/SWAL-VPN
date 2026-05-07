@@ -952,21 +952,26 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <MapPin className="w-3 h-3" />
-              <span>Current IP: 182.45.12.9 (Exposed)</span>
+              <span>
+                Current IP: <span className={status === 'connected' ? 'text-blue-400' : 'text-red-400'}>
+                  {status === 'connected' ? selectedServer.ip : '182.45.12.9'}
+                </span> 
+                <span className="ml-1 opacity-60">({status === 'connected' ? 'Protected' : 'Exposed'})</span>
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-3 h-3" />
-              <span>Expires: {new Date(userProfile.expiryDate).toLocaleDateString()}</span>
+              <span>Expires: {userProfile.expiryDate ? new Date(userProfile.expiryDate).toLocaleDateString() : 'Never'}</span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="w-3 h-3" />
-              <span>Tier: {userProfile.tier}</span>
+              <span>Tier: <span className="text-blue-400">{userProfile.tier.toUpperCase()}</span></span>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span>Version 2.4.0</span>
+            <span>Production Build</span>
             <div className="w-1 h-1 rounded-full bg-zinc-700" />
-            <span>Support</span>
+            <button className="hover:text-white transition-colors">Support</button>
           </div>
         </div>
       </footer>

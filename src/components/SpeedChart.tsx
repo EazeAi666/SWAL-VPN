@@ -6,9 +6,17 @@ interface SpeedChartProps {
 }
 
 export const SpeedChart: React.FC<SpeedChartProps> = ({ data }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-48 w-full flex items-center justify-center text-zinc-600 text-xs italic bg-zinc-950/20 rounded-lg">
+        Collecting network traffic data...
+      </div>
+    );
+  }
+
   return (
-    <div className="h-48 w-full min-h-[192px]">
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+    <div className="h-48 w-full min-h-[192px] relative">
+      <ResponsiveContainer width="100%" height="100%" debounce={100}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorDownload" x1="0" y1="0" x2="0" y2="1">

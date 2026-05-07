@@ -16,7 +16,7 @@ export const SpeedChart: React.FC<SpeedChartProps> = ({ data }) => {
 
   return (
     <div className="h-48 w-full min-h-[192px] relative">
-      <ResponsiveContainer width="100%" height="100%" debounce={100}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={100}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorDownload" x1="0" y1="0" x2="0" y2="1">

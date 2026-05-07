@@ -14,6 +14,7 @@ import {
   MapPin,
   RefreshCw,
   Info,
+  AlertCircle,
   LogIn,
   Calendar,
   Key,
@@ -94,12 +95,12 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
     }
   };
 
-  const [logs, setLogs] = useState<{ time: string; message: string; type: 'info' | 'success' | 'warning' }[]>([
+  const [logs, setLogs] = useState<{ time: string; message: string; type: 'info' | 'success' | 'warning' | 'error' }[]>([
     { time: new Date().toLocaleTimeString(), message: 'System initialized', type: 'info' },
     { time: new Date().toLocaleTimeString(), message: `User tier: ${userProfile.tier.toUpperCase()}`, type: 'info' },
   ]);
 
-  const addLog = (message: string, type: 'info' | 'success' | 'warning' = 'info') => {
+  const addLog = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
     setLogs(prev => [{ time: new Date().toLocaleTimeString(), message, type }, ...prev].slice(0, 50));
   };
 
@@ -145,7 +146,7 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
       setTimeout(() => {
         setStatus('disconnected');
         setStats({ downloadSpeed: 0, uploadSpeed: 0, dataTransferred: 0, duration: 0 });
-        addLog('Disconnected from VPN', 'warning');
+        addLog('Disconnected from VPN', 'error');
       }, 1500);
     }
   };
@@ -302,8 +303,8 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                 </motion.div>
               )}
             </AnimatePresence>
-            <Badge variant="outline" className={`${status === 'connected' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'} px-3 py-1`}>
-              <div className={`w-1.5 h-1.5 rounded-full mr-2 ${status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-zinc-500'}`} />
+            <Badge variant="outline" className={`${status === 'connected' ? 'bg-green-500/10 text-green-500 border-green-500/20' : status === 'disconnected' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'} px-3 py-1`}>
+              <div className={`w-1.5 h-1.5 rounded-full mr-2 ${status === 'connected' ? 'bg-green-500 animate-pulse' : status === 'disconnected' ? 'bg-red-500' : 'bg-zinc-500'}`} />
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </Badge>
             <Button 
@@ -423,11 +424,12 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                   className={`flex items-center justify-center gap-2 ${status === 'disconnected' ? 'cursor-pointer group' : ''}`}
                   onClick={status === 'disconnected' ? quickConnect : undefined}
                 >
+                  {status === 'disconnected' && <AlertCircle className="w-6 h-6 text-red-500 animate-pulse" />}
                   <h2 className={`text-2xl font-bold transition-colors duration-500 ${
                     status === 'connected' ? 'text-green-500' : 
                     status === 'connecting' ? 'text-yellow-500' : 
                     status === 'disconnecting' ? 'text-red-500' : 
-                    'text-white group-hover:text-blue-500'
+                    'text-red-500/80 group-hover:text-red-500'
                   }`}>
                     {status === 'connected' ? 'Protected' : 
                      status === 'connecting' ? 'Securing Connection...' : 
@@ -642,11 +644,13 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                             <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
                               log.type === 'success' ? 'bg-green-500' :
                               log.type === 'warning' ? 'bg-yellow-500' :
+                              log.type === 'error' ? 'bg-red-500' :
                               'bg-blue-500'
                             }`} />
                             <span className={
                               log.type === 'success' ? 'text-green-500/90' :
                               log.type === 'warning' ? 'text-yellow-500/90' :
+                              log.type === 'error' ? 'text-red-500/90' :
                               'text-zinc-400'
                             }>
                               {log.message}
@@ -795,6 +799,7 @@ export default function VpnDashboard({ userProfile, onSignOut }: VpnDashboardPro
                           <span className={
                             log.type === 'success' ? 'text-green-500' :
                             log.type === 'warning' ? 'text-yellow-500' :
+                            log.type === 'error' ? 'text-red-500' :
                             'text-zinc-400'
                           }>
                             {log.message}

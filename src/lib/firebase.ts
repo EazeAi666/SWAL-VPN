@@ -34,17 +34,19 @@ const firebaseConfig: any = { ...envConfig };
 try {
   // @ts-ignore
   const globConfig = import.meta.glob('../../firebase-applet-config.json', { eager: true, import: 'default' });
-  const jsonConfig: any = Object.values(globConfig)[0];
-  
-  if (jsonConfig) {
-    Object.keys(jsonConfig).forEach(key => {
-      if (isPlaceholder(firebaseConfig[key])) {
-        firebaseConfig[key] = jsonConfig[key];
-      }
-    });
+  const configs = Object.values(globConfig);
+  if (configs.length > 0) {
+    const jsonConfig: any = configs[0];
+    if (jsonConfig) {
+      Object.keys(jsonConfig).forEach(key => {
+        if (isPlaceholder(firebaseConfig[key])) {
+          firebaseConfig[key] = jsonConfig[key];
+        }
+      });
+    }
   }
 } catch (e) {
-  // Config file might be missing
+  // Config file is missing - expected for Vercel
 }
 
 // Final fallback to empty strings for initialization

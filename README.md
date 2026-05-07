@@ -8,11 +8,21 @@ You need to upload your logo file for the app to look professional:
 - **Location**: `/public/logo.png`
 - **Action**: Use the file explorer on the left to upload your eagle/key logo into the `public` folder.
 
-## 2. 🔐 Firebase Production Setup
-I have hardened your **Firestore Security Rules**. To finalize:
-1. Click the **Firebase** icon in the sidebar.
-2. Ensure you see "Firebase is connected".
-3. If you want to use your own domain, you can set that up in the [Firebase Console](https://console.firebase.google.com/).
+## 2. 🔐 Vercel & Firebase Setup
+Since you are moving to Vercel, you must manually add your Firebase configuration to the **Vercel Dashboard** under **Environment Variables**:
+
+1. Go to your project on Vercel.
+2. Go to **Settings** > **Environment Variables**.
+3. Add the following keys (copy values from your Firebase Project Settings):
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+   - `VITE_FIREBASE_DATABASE_ID` (Optional)
+
+I have hardened your **Firestore Security Rules**. Make sure to deploy them to your Firebase project using the Firebase CLI or the Firebase Console.
 
 ## 3. 📱 Mobile PWA (Play Store Ready)
 The app is configured as a **Progressive Web App (PWA)**.
